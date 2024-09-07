@@ -1,10 +1,12 @@
 # python3 -m streamlit run app.py
+#   Network URL: http://10.223.134.207:8501
+#   External URL: http://34.213.214.55:8501
 
 import streamlit as st
 import psutil
 import matplotlib.pyplot as plt
 import platform
-
+import pandas as pd
 
 # Retrieve the OS name
 os_name = platform.system()  # Basic OS type (e.g., 'Linux', 'Windows', 'Darwin')
@@ -78,3 +80,24 @@ st.write(f"Total Memory: {memory.total // (1024 ** 3)} GB")
 st.write(f"Available Memory: {memory.available // (1024 ** 3)} GB")
 st.write(f"Total Disk Space: {disk.total // (1024 ** 3)} GB")
 st.write(f"Free Disk Space: {disk.free // (1024 ** 3)} GB")
+
+
+
+# Display top processes by CPU and memory usage
+st.subheader("Top Processes")
+
+# Retrieve processes sorted by CPU usage
+def get_top_processes(num=5):
+    # Fetch all processes info
+    processes = []
+    for proc in psutil.process_iter(['pid', 'name', 'cpu_percent', 'memory_percent']):
+        processes.append(proc.info)
+    # Convert to DataFrame for sorting and display
+    df = pd.DataFrame(processes)
+    df.sort_values(by='cpu_percent', ascending=False, inplace=True)
+    return df.head(num)
+
+# Show top 5 processes by CPU usage
+top_processes = get_top_processes(10)
+st.write("### Top Processes by CPU Usage")
+st.dataframe(top_processes[['pid', 'name', 'cpu_percent', 'memory_percent']])
